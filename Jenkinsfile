@@ -2,7 +2,8 @@ pipeline {
     agent {
         docker {
             image 'python:3.9'
-        }
+            args '-u root'
+    }
     }
     environment {
         DOCKER_IMAGE = "paycare-image:latest"
@@ -16,8 +17,8 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 sh '''
-                python3 -m  pip install --upgrade pip --user 
-                python3 -m pip install --user -r requirements.txt
+                python3 -m  pip install --upgrade pip 
+                python3 -m pip install -r requirements.txt
                 '''
             }
         }
