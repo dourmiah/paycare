@@ -25,7 +25,10 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    sh 'pytest tests/tests.py --junitxml=results.xml'
+                    sh """
+                    export PYTHONPATH=\$PYTHONPATH:$(pwd)
+                    pytest tests/tests.py --junitxml=results.xml
+                    """
                 }
             }
             post {
