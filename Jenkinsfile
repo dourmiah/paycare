@@ -14,44 +14,23 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/dourmiah/paycare.git'
             }
         }
-        stage('Install Dependencies') {
+        stage('Build Docker Image') {
             steps {
-                sh '''
-                python3 -m  pip install --upgrade pip 
-                python3 -m pip install -r requirements.txt
-                '''
+                script {
+                    docker.build('paycare-image:latest')
+                }
             }
         }
         stage('Run Tests') {
             steps {
                 script {
-                    sh '''
-                    export PYTHONPATH=\$PYTHONPATH:$(pwd)
-                    pytest tests/tests.py --junitxml=results.xml
-                    '''
-                }
-            }
-            post {
-                always {
-                    junit 'results.xml'
+                    docker.image('paycare-image:latest').inside {
+                        sh 'pytest tests/tests.py --junitxml=results.xml'
+                    }
                 }
             }
         }
-        // stage('Build Docker Image') {
-        //     steps {
-        //         script {
-        //             docker.build("paycare-image:latest")
-        //         }
-        //     }
-        // }
-         stage('Build Docker Image') {
-            steps {
-                script{
-                    sh 'docker build . -t ${DOCKER_IMAGE}'
-                }
-            }
-        }
-        stage('Run Container') {
+       stage('Run Container') {
             steps {
                 script {
                     sh 'docker run --rm -v "$(pwd):/home/app" ${DOCKER_IMAGE}'
